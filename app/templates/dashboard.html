@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block page_content %}
+    <div id="main" class="main">
+        {% include "guinnessNav.html" %}
+    </div>
+{% endblock %}
+{% block scripts %}
+    {{ super() }}
+    <script>
+        dashboardPageControllers.initDashboardPage();
+    </script>
+{% endblock %}

@@ -1,0 +1,22 @@
+[[source]]
+
+url = "https://pypi.python.org/simple"
+name = "pypi"
+verify_ssl = true
+
+
+[dev-packages]
+
+
+
+[packages]
+
+flask = "*"
+flask-oauth = "*"
+flask-oauthlib = "*"
+flask-bootstrap = "*"
+
+
+[requires]
+
+python_version = "3.5"
