@@ -1,0 +1,23 @@
+<table class="table table-bordered table-responsive" id="adminUsersDataTable">
+    {% for user in users_list %}
+        <tr id="{{ user.id }}">
+            <td>{{ user.id }}</td>
+            <td>{{ user.username }}</td>
+            <td>{{ user.customer_id }}</td>
+            <td>{{ user.confirmed }}</td>
+            <td>{{ user.archived }}</td>
+            <td>
+                {% if user.archived %}
+                    <button class="btn btn-color-fix toggleArchiveUser">Unarchive</button>
+                {% elif user.confirmed %}
+                    <button class="btn btn-color-fix resetPassword">Reset Password</button>
+                    <br>
+                    <br>
+                    <button class="btn btn-color-fix toggleArchiveUser">Archive</button>
+                {% else %}
+                    <button class="btn btn-color-fix resendEmail">Resend Confirmation E-mail</button>
+                {% endif %}
+            </td>
+        </tr>
+    {% endfor %}
+</table>

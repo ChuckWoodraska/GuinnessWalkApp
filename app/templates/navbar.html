@@ -1,33 +1,10 @@
 <div class="navbar navbar-default navbar-fixed-top" role="navigation" style="background-color: #DDDDDD;" id="navbar">
     <div class="container-fluid">
         <div class="navbar-header">
-            <a href="{{ url_for('index') }}">
+            <a href="{{ url_for('gw.index') }}">
                 <img class="navbar-brand n" src="{{ url_for('static', filename='images/logo.png') }}">
             </a>
         </div>
-
-
-               {% if user %}
-                <ul class="navbar-brand navbar-nav navbar-right">
-                    <li class="dropdown" style="list-style: none;">
-                        <a data-toggle="dropdown" class="dropdown-toggle"
-                           href="#">{{ user }} <b class="caret"></b> </a>
-                        <ul class="dropdown-menu">
-                            <li><a href="{{ url_for('settings') }}">Settings</a></li>
-                            <li class="divider"></li>
-                            <li><a href="{{ url_for('logout') }}">Logout</a></li>
-                        </ul>
-                    </li>
-                </ul>
-                <a class="navbar-brand navbar-nav" href="{{ url_for('map') }}">Map</a>
-                <a class="navbar-brand navbar-nav" href="{{ url_for('cards') }}">Cards</a>
-                <a class="navbar-brand navbar-nav" href="{{ url_for('review') }}">Review</a>
-           {% if user == 'chuck.woodraska@gmail.com' %}
-                <a class="navbar-brand navbar-nav" href="{{ url_for('admin') }}">Admin</a>
-               {% endif %}
-            {% else %}
-                <a class="navbar-brand navbar-nav navbar-right" href="{{ url_for('login') }}">Login</a>
-            {% endif %}
-
+        <a class="navbar-brand navbar-nav" href="{{ url_for('gw.admin') }}">Admin</a>
     </div>
 </div>

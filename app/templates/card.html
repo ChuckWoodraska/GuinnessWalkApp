@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block page_content %}
+    <br>
+    <br>
+    <br>
+    <div id="main" class="main">
+        <table class="table table-bordered table-responsive" id="adminBarsDataTable">
+            {% for bar in bar_list %}
+                <tr id="{{ bar['id'] }}">
+                    <td>{{ bar['bar_name'] }}</td>
+                    <td>{{ bar['location'] }}</td>
+                    <td>{{ bar['position'] }}</td>
+                    <td>
+                        <button>Edit</button>
+                        <br>
+                        <br>
+                        <button>Delete</button>
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+{% endblock %}
+{% block scripts %}
+    {{ super() }}
+    <script>
+        adminBarsDataTableControllers.initAdminBarsDataTable();
+    </script>
+{% endblock %}

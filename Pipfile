@@ -1,22 +1,24 @@
 [[source]]
-
 url = "https://pypi.python.org/simple"
 name = "pypi"
 verify_ssl = true
 
-
 [dev-packages]
 
-
-
 [packages]
-
 flask = "*"
 flask-oauth = "*"
-flask-oauthlib = "*"
 flask-bootstrap = "*"
-
+flask-login = "*"
+flask-migrate = "*"
+flask-wtf = "*"
+flask-blueprint = "*"
+gunicorn = "*"
+eventlet = "*"
+flask-dance = {extras = ["sqla"],version = "*"}
+chuck-pyutils = {editable = true,git = "https://github.com/ChuckWoodraska/ChuckPyUtils.git"}
+psycopg2 = "*"
+psycopg2-binary = "*"
 
 [requires]
-
-python_version = "3.5"
+python_version = "3.6"

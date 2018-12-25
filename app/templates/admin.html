@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block page_content %}
+    <br>
+    <br>
+    <br>
+    <div id="main" class="main">
+        {% include 'adminBarsTable.html' %}
+    </div>
+{% endblock %}
+{% block scripts %}
+    {{ super() }}
+    <script>
+        adminBarsDataTableControllers.initAdminBarsDataTable();
+    </script>
+{% endblock %}
