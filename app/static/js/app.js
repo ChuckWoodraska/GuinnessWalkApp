@@ -12,6 +12,64 @@ let dashboardPageControllers = {
     }
 };
 
+function initMap() {
+    let map = new google.maps.Map(document.getElementById('map'), {
+        zoom: 18,
+        center: {lat: 32.816, lng: -80.036}
+    });
+    let infowindow = new google.maps.InfoWindow({});
+    let geocoder = new google.maps.Geocoder();
+    $.get("/map_data", (data) => {
+        data.forEach(function (item) {
+            geocoder.geocode({'address': item.location}, function (results, status) {
+                if (status === 'OK') {
+                    if (item.current === true) {
+                        let marker = new google.maps.Marker({
+                            position: results[0].geometry.location,
+                            map: map,
+                            title: item.bar_name,
+                            icon: "http://maps.google.com/mapfiles/ms/icons/green-dot.png"
+
+                        });
+                        map.setCenter(results[0].geometry.location);
+                        marker.addListener('click', function () {
+                            infowindow.setContent(marker.title);
+                            infowindow.open(map, marker);
+                        });
+                    } else {
+                        let marker = new google.maps.Marker({
+                            position: results[0].geometry.location,
+                            map: map,
+                            title: item.bar_name,
+                        });
+                        marker.addListener('click', function () {
+                            infowindow.setContent(marker.title);
+                            infowindow.open(map, marker);
+                        });
+                    }
+
+                } else {
+                    alert('Geocode was not successful for the following reason: ' + status);
+                }
+            });
+
+
+        });
+    });
+}
+
+let mapPageControllers = {
+    initMapPage: () => {
+
+    },
+    initMap: () => {
+        let map = new google.maps.Map(document.getElementById('map'), {
+            zoom: 18,
+            center: {lat: 32.816, lng: -80.036}
+        });
+    }
+};
+
 let adminBarsDataTableModels = {
     tableObj: null
 };

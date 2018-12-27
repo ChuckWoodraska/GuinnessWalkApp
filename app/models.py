@@ -183,6 +183,7 @@ class Bars(BaseModel):
     location = db.Column("location", db.Text)
     position = db.Column("position", db.Integer)
     picture_uri = db.Column("picture_uri", db.Text)
+    current = db.Column("current", db.Boolean, server_default="0")
 
     # user_access = db.Relationship()
 
