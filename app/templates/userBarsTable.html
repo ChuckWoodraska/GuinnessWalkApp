@@ -1,0 +1,12 @@
+<table class="table table-bordered table-responsive" id="userBarsDataTable">
+    {% for bar in bar_list %}
+        <tr id="{{ bar['id'] }}">
+            <td>{{ bar['bar_name'] }}</td>
+            <td>{{ bar[''] }}</td>
+
+            <td>
+                <button class="editBar">Edit</button>
+            </td>
+        </tr>
+    {% endfor %}
+</table>

@@ -4,6 +4,7 @@ from flask_dance.consumer import oauth_authorized, oauth_error
 from flask_login import current_user, login_user, logout_user, login_required
 from app.models import Bars, Users, UsersToBars, OAuth, db
 from chuck_pyutils import web as web_utils
+
 gw = Blueprint('gw', __name__)
 
 
@@ -118,6 +119,7 @@ def index():
 def map():
     return render_template('map.html')
 
+
 @gw.route('/map_data')
 def map_data():
     bars = Bars.query.all()
@@ -129,19 +131,23 @@ def map_data():
         bar_list.append(bar_dict)
     return jsonify(bar_list)
 
+
 @gw.route('/review')
 def review():
-    bars = Bars.query.all()
-    if 'google_token' in session:
-        me = google.get('userinfo')
-        return render_template('review.html', user=me.data.get('email'), bar_list=bars)
-    return render_template('start.html')
+    user_bars = UsersToBars.query.all()
+    for user_bar in user_bars:
+        print(user_bar)
+    return render_template('review.html')
+
+
 #
 #
 @gw.route('/admin')
 def admin():
     bars = Bars.query.all()
     return render_template('admin.html', bar_list=bars)
+
+
 #
 #
 # @gw.route('/settings')
@@ -160,7 +166,7 @@ def get_bars():
 
 @gw.route('/bars', methods=['POST'])
 def create_bar():
-    bars_length = len(Bars.query.all())+1
+    bars_length = len(Bars.query.all()) + 1
     data_dict = {
         "position": bars_length,
         "bar_name": "",
@@ -216,6 +222,7 @@ def delete_bar(bar_id):
     bar.delete_commit()
     template = render_template("adminBarsTable.html", bar_list=Bars.query.all())
     return jsonify({"message": "Successfully deleted bar.", "template": template})
+
 
 #
 # @gw.route('/bars', methods=['GET'])
@@ -286,11 +293,8 @@ def delete_bar(bar_id):
 def login():
     return render_template('login.html')
 
+
 @gw.route('/logout')
 def logout():
     login_manager.logout_user()
     return redirect(url_for('index'))
-
-
-
-

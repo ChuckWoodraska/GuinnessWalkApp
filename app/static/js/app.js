@@ -12,6 +12,13 @@ let dashboardPageControllers = {
     }
 };
 
+let reviewPageControllers = {
+    initReviewPage: () => {
+        barsDataTableControllers.initBarsDataTable();
+
+    }
+};
+
 function initMap() {
     let map = new google.maps.Map(document.getElementById('map'), {
         zoom: 18,

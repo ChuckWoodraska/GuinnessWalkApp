@@ -202,6 +202,7 @@ class UsersToBars(BaseModel):
     rating = db.Column("rating", db.Integer)
     comments = db.Column("comments", db.Text)
 
+    bars = db.relationship(Bars)
     # user_access = db.Relationship()
 
     @classmethod
