@@ -116,7 +116,8 @@ def index():
 #
 @gw.route('/map')
 def map():
-    return render_template('map.html')
+    browser_key = current_app.config['GOOGLE']
+    return render_template('map.html', browser_key=browser_key)
 
 @gw.route('/map_data')
 def map_data():
