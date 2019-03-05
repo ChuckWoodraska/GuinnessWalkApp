@@ -277,30 +277,76 @@ let barsDataTableControllers = {
             orderCellsTop: true,
             columns: [
                 {title: "Bar Name"},
-                {title: "Score"},
-                {title: "Group Score"},
-                {title: "Comments"}
+                {title: "Rating", name: "Rating"},
+                {title: "Group Rating"},
+                {title: "Comments", name: "Comments"},
+                {title: "Actions"},
             ],
             dom: "lfip",
             order: [[0, "asc"]]
         });
         initDataTable(barsDataTableModels.tableObj, barsDataTable);
         barsDataTable.find("tbody")
-            .on("click", "button.edit", function (e) {
+            .on("click", "button.editBar", function (e) {
                 e.preventDefault();
                 e.stopPropagation();
                 let barId = $(this).closest("tr").attr("id");
-                // let tableObj = adminBarsDataTableModels.tableObj;
+                let tableObj = barsDataTableModels.tableObj;
                 //noinspection JSUnresolvedFunction
-                // let barRow = tableObj.row(`#${barId}`);
+                let barRow = tableObj.row(`#${barId}`);
+                console.log(barRow);
                 //noinspection JSUnresolvedFunction
-                // let barName = tableObj.cell(barRow, tableObj.column("Name:name")).data();
+                let barRating = tableObj.cell(barRow, tableObj.column("Rating:name")).data();
                 //noinspection JSUnresolvedFunction
-                // let barDescription = tableObj.cell(barRow, tableObj.column("Description:name")).data();
-                // barsDataTableViews.renderEditModal(barName, barDescription);
-                // barsDataTableControllers.initEditModal(barId);
+                let barComment = tableObj.cell(barRow, tableObj.column("Comments:name")).data();
+                barsDataTableViews.renderEditModal(barRating, barComment);
+                barsDataTableControllers.initEditModal(barId);
             });
+    },
+    initEditModal: function (barId) {
+        $("#editBarBtn").on("click", function (e) {
+            e.preventDefault();
+            let editBarFormData = $("#editBarForm").serializeArray();
+            $.ajax({
+                "url": `/reviews/${barId}`,
+                "type": "PUT",
+                "dataType": "json",
+                "data": editBarFormData,
+                "success": function (data) {
+                    // growlMessage(data.result, data.message);
+                    barsDataTableModels.tableObj.destroy();
+                    $("#main").html(data.template);
+                    barsDataTableControllers.initBarsDataTable();
+                    $("#pageModal").modal("hide");
+                }
+            });
+        });
 
+    }
+};
+
+let barsDataTableViews = {
+    renderEditModal: function (barRating, barComment) {
+        let pageModal = $("#pageModal");
+        let pageModalBody = $("#pageModalBody");
+        pageModalBody.html(`
+                 <form role="form" name="editBarForm" id="editBarForm">
+                <div>
+                    <label class="control-label" for="barName"><strong>Bar Rating</strong></label>
+                    <input style="display: block; width: 100%;" id="barRating" name="rating" 
+                           class="form-control" type="text" value="${barRating}">
+                    <label class="control-label" for="barComment"><strong>Bar Comment</strong></label>
+                    <input style="display: block; width: 100%;" id="barComment" name="comments" 
+                           class="form-control" type="text" value="${barComment}">
+                </div>
+            </form>
+            `);
+        pageModal.find(".modal-title").text("Update Review");
+        pageModal.find(".modal-footer").html(`
+                            <button type="button" id="editBarBtn" class="btn btn-color-fix">Update</button>
+                            <button type="button" class="btn btn-default btn-color-fix" data-dismiss="modal">Close</button>
+                        `);
+        pageModal.modal("show");
     }
 };
 

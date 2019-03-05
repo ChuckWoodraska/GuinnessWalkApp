@@ -19,6 +19,7 @@ flask-dance = {extras = ["sqla"],version = "*"}
 chuck-pyutils = {editable = true,git = "https://github.com/ChuckWoodraska/ChuckPyUtils.git"}
 psycopg2 = "*"
 psycopg2-binary = "*"
+blinker = "*"
 
 [requires]
 python_version = "3.6"

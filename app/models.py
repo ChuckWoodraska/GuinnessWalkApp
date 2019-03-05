@@ -125,7 +125,7 @@ class Users(BaseModel):
     google_id = db.Column(db.String(255), unique=True, nullable=False)
     password_hash = db.Column(db.String(255))
     registered_on = db.Column(db.DateTime)
-    role_id = db.Column(db.Integer, server_default="1")
+    role_id = db.Column(db.Integer, server_default="2")
     archived = db.Column(db.Boolean, server_default="0")
 
     def __init__(self, email):
@@ -185,7 +185,7 @@ class Bars(BaseModel):
     picture_uri = db.Column("picture_uri", db.Text)
     current = db.Column("current", db.Boolean, server_default="0")
 
-    # user_access = db.Relationship()
+    reviews = db.relationship("UsersToBars", cascade="delete")
 
     @classmethod
     def read(cls, id_) -> "Bars":
@@ -199,8 +199,8 @@ class UsersToBars(BaseModel):
     )
     user_id = db.Column("user_id", db.Integer, db.ForeignKey("users.id"))
     bar_id = db.Column("bar_id", db.Integer, db.ForeignKey("bars.id"))
-    rating = db.Column("rating", db.Integer)
-    comments = db.Column("comments", db.Text)
+    rating = db.Column("rating", db.Integer, server_default="5")
+    comments = db.Column("comments", db.Text, server_default="")
 
     bars = db.relationship(Bars)
     # user_access = db.Relationship()
@@ -214,6 +214,7 @@ class OAuth(OAuthConsumerMixin, db.Model):
     id = db.Column(
         "id", db.Integer, primary_key=True, unique=True, index=True, autoincrement=True
     )
-    provider_user_id = db.Column(db.String(256), unique=True)
-    user_id = db.Column(db.Integer, db.ForeignKey(Users.id))
+    provider_user_id = db.Column("provider_user_id", db.String(256), unique=True)
+    provider = db.Column("provider", db.String(256), unique=True)
+    user_id = db.Column("user_id", db.Integer, db.ForeignKey(Users.id))
     user = db.relationship(Users)
