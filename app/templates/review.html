@@ -6,21 +6,12 @@
     <br>
     <br>
     <div id="main" class="main">
-       <table class="table table-bordered table-responsive" id="barsDataTable">
-    {% for bar in bar_list %}
-        <tr id="{{ bar['id'] }}">
-            <td>{{ bar['bar_name'] }}</td>
-            <td>{{ bar['score'] }}</td>
-            <td>{{ bar['group_score'] }}</td>
-            <td>{{ bar['comments'] }}</td>
-        </tr>
-    {% endfor %}
-</table>
+        {% include 'reviewTable.html' %}
     </div>
 {% endblock %}
 {% block scripts %}
     {{ super() }}
     <script>
-        dashboardPageControllers.initDashboardPage();
+        reviewPageControllers.initReviewPage();
     </script>
 {% endblock %}

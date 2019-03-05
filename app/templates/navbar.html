@@ -6,6 +6,23 @@
             </a>
         </div>
         <a class="navbar-brand navbar-nav" href="{{ url_for('gw.map') }}">Map</a>
-        <a class="navbar-brand navbar-nav" href="{{ url_for('gw.admin') }}">Admin</a>
+        <a class="navbar-brand navbar-nav" href="{{ url_for('gw.reviews') }}">Review</a>
+        {% if current_user.role_id == 1 %}
+            <a class="navbar-brand navbar-nav" href="{{ url_for('gw.admin') }}">Admin</a>
+        {% endif %}
+        {% if current_user.is_authenticated %}
+        <ul class="navbar-brand navbar-nav navbar-right">
+                    <li class="dropdown" style="list-style: none;">
+                        <a data-toggle="dropdown" class="dropdown-toggle"
+                           href="#">{{ current_user.display_name }} <b class="caret"></b> </a>
+                        <ul class="dropdown-menu">
+                            <li><a href="{{ url_for('gw.logout') }}">Logout</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            {% else %}
+                <a class="navbar-brand navbar-nav navbar-right" href="{{ url_for('google.login') }}">Login</a>
+            {% endif %}
+
     </div>
 </div>

@@ -1,9 +1,9 @@
 from flask import Flask, redirect, url_for, session, request, jsonify, render_template, Blueprint, current_app
-from app.extensions import login_manager, google_auth_bp
-from flask_dance.consumer import oauth_authorized, oauth_error
-from flask_login import current_user, login_user, logout_user, login_required
-from app.models import Bars, Users, UsersToBars, OAuth, db
+from app.extensions import login_manager
+from flask_login import logout_user, current_user
+from app.models import Bars, Users, UsersToBars
 from chuck_pyutils import web as web_utils
+
 gw = Blueprint('gw', __name__)
 
 
@@ -17,107 +17,11 @@ def index():
     return render_template('start.html')
 
 
-# Create/Login local user on successful OAuth login
-# @oauth_authorized.connect_via(google_auth_bp)
-# def google_logged_in(blueprint, token):
-#     if not token:
-#         print("Failed to log in with Google.")
-#         return False
-#
-#     resp = blueprint.session.get("/oauth2/v2/userinfo")
-#     if not resp.ok:
-#         msg = "Failed to fetch user info from Google."
-#         print(msg)
-#         return False
-#
-#     google_info = resp.json()
-#     google_user_id = str(google_info['id'])
-#
-#     # Find this OAuth token in the database, or create it
-#     query = OAuth.query.filter_by(
-#         provider=blueprint.name,
-#         provider_user_id=google_user_id,
-#     )
-#     oauth = query.one()
-#
-#
-#     if oauth.user:
-#         login_user(oauth.user)
-#         print("Successfully signed in with Google.")
-#     else:
-#         # Create a new user
-#         user = Users(email=google_info['email'])
-#         oauth.user = user
-#         db.session.add_all([user, oauth])
-#         db.session.commit()
-#         login_user(user)
-#         print("Successfully created a new account using Google.")
-#
-#     return False
-#
-#
-# @oauth_error.connect_via(google_auth_bp)
-# def google_error(blueprint, error, error_description=None, error_uri=None):
-#     msg = (
-#         "OAuth error from {name}! "
-#         "error={error} description={description} uri={uri}"
-#     ).format(
-#         name=blueprint.name,
-#         error=error,
-#         description=error_description,
-#         uri=error_uri,
-#     )
-#     print(msg, category="error")
-
-
-# @gw.route('/login/authorized')
-# def authorized():
-#     remote_app = GoogleSignIn()
-#     provider, social_id, email_address, username = remote_app.authorized()
-#     print(provider, social_id, email_address, username)
-#     # if provider is not None and social_id is not None:
-#     #     # If the social user is not known, add to our database.
-#     #     user = User.query.filter_by(provider=provider).filter_by(
-#     #         social_id=social_id).first()
-#     #     if user is None:
-#     #         user = User(
-#     #             provider=provider,
-#     #             social_id=social_id,
-#     #             email_address=email_address,
-#     #             username=username
-#     #             )
-#     #         db.session.add(user)
-#     #         db.session.commit()
-#     #     # Flask-Login login_user() function to record the user is logged in
-#     #     # for the user session.
-#     #     login_user(user)
-#     #     flash('Signed in successfully.', 'info')
-#     #     return redirect(url_for('main.index'))
-#     #
-#     # else:
-#     #     flash('Authentication failed!', 'error')
-#     #     return redirect(url_for('main.index'))
-#
-#
-# @gw.route('/callback/google')
-# def oauth_callback():
-#     if not current_user.is_anonymous:
-#         return redirect(url_for('index'))
-#     oauth = GoogleSignIn()
-#     social_id, username, email = oauth.callback()
-#     if social_id is None:
-#         return redirect(url_for('index'))
-#     user = Users.query.filter_by(social_id=social_id).first()
-#     if not user:
-#         oauth.create_user()
-#     login_user(user, True)
-#     return redirect(url_for('index'))
-#
-#
 @gw.route('/map')
 def map():
     browser_key = current_app.config['GOOGLE']
     return render_template('map.html', browser_key=browser_key)
+
 
 @gw.route('/map_data')
 def map_data():
@@ -130,19 +34,35 @@ def map_data():
         bar_list.append(bar_dict)
     return jsonify(bar_list)
 
-@gw.route('/review')
-def review():
-    bars = Bars.query.all()
-    if 'google_token' in session:
-        me = google.get('userinfo')
-        return render_template('review.html', user=me.data.get('email'), bar_list=bars)
-    return render_template('start.html')
-#
-#
+
+@gw.route('/reviews')
+def reviews():
+    user_bars = UsersToBars.query.filter(UsersToBars.user_id == current_user.id).all()
+    return render_template('review.html', user_bars=user_bars)
+
+@gw.route('/reviews/<int:review_id>', methods=['PUT'])
+def update_review(review_id):
+    review = UsersToBars.read(review_id)
+    data_dict = {
+        "rating": "",
+        "comments": ""
+    }
+    data_dict = web_utils.data_formatter(data_dict, request.form)
+    review.rating = data_dict['rating']
+    review.comments = data_dict['commentsl']
+    review.update()
+    user_bars = UsersToBars.query.filter(UsersToBars.user_id == current_user.id).all()
+    template = render_template("reviewTable.html", user_bars=user_bars)
+    return jsonify({"message": "Successfully updated review.", "template": template})
+
+
+
 @gw.route('/admin')
 def admin():
     bars = Bars.query.all()
     return render_template('admin.html', bar_list=bars)
+
+
 #
 #
 # @gw.route('/settings')
@@ -161,7 +81,7 @@ def get_bars():
 
 @gw.route('/bars', methods=['POST'])
 def create_bar():
-    bars_length = len(Bars.query.all())+1
+    bars_length = len(Bars.query.all()) + 1
     data_dict = {
         "position": bars_length,
         "bar_name": "",
@@ -172,7 +92,16 @@ def create_bar():
     bar.bar_name = data_dict.get("bar_name")
     bar.location = data_dict.get("location")
     bar.position = data_dict.get("position")
-    Bars.create_commit(bar)
+    bar_id = Bars.create_commit(bar)
+
+    users = Users.query.all()
+    for user in users:
+        user_to_bar = UsersToBars()
+        user_to_bar.user_id = user.id
+        user_to_bar.bar_id = bar_id
+        user_to_bar.rating = 5
+        user_to_bar.comments = ""
+        UsersToBars.create_commit(user_to_bar)
     template = render_template("adminBarsTable.html", bar_list=Bars.query.all())
     return jsonify({"message": "Successfully added bar.", "template": template})
 
@@ -218,11 +147,12 @@ def delete_bar(bar_id):
     template = render_template("adminBarsTable.html", bar_list=Bars.query.all())
     return jsonify({"message": "Successfully deleted bar.", "template": template})
 
-#
-# @gw.route('/bars', methods=['GET'])
-# def get_bars():
-#     return jsonify({})
-#
+
+
+@gw.route('/reviews', methods=['GET'])
+def get_reviews():
+    return jsonify({})
+
 #
 # @gw.route('/bars', methods=['POST'])
 # def create_bar():
@@ -287,11 +217,8 @@ def delete_bar(bar_id):
 def login():
     return render_template('login.html')
 
+
 @gw.route('/logout')
 def logout():
-    login_manager.logout_user()
-    return redirect(url_for('index'))
-
-
-
-
+    logout_user()
+    return redirect(url_for('gw.index'))
