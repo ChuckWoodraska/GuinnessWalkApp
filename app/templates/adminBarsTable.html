@@ -4,7 +4,7 @@
             <td>{{ bar['position'] }}</td>
             <td>{{ bar['bar_name'] }}</td>
             <td>{{ bar['location'] }}</td>
-
+            <td><input type="radio" name="currentBar" {% if bar['current'] %}checked{% endif %}></td>
             <td>
                 <button class="editBar">Edit</button>
                 <br>

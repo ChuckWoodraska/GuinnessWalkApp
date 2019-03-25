@@ -135,6 +135,16 @@ def update_bar(bar_id):
     return jsonify({"message": "Successfully updated bar.", "template": template})
 
 
+@gw.route('/bars/<int:bar_id>/update_current_bar', methods=['PUT'])
+def update_current_bar(bar_id):
+    bar = Bars.read(bar_id)
+    prev_bar = Bars.query.filter(Bars.current == True).one()
+    prev_bar.current = False
+    bar.current = True
+    bar.update()
+    return jsonify({"message": "Successfully updated bar."})
+
+
 @gw.route('/bars/<int:bar_id>', methods=['DELETE'])
 def delete_bar(bar_id):
     bar = Bars.read(bar_id)

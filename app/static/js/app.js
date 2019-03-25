@@ -95,6 +95,7 @@ let adminBarsDataTableControllers = {
                 {title: "Postion", name: "Position"},
                 {title: "Bar Name", name: "Bar Name"},
                 {title: "Location", name: "Location"},
+                {title: "Current Bar"},
                 {title: "Actions"},
             ],
             order: [[0, "asc"]],
@@ -137,6 +138,18 @@ let adminBarsDataTableControllers = {
                 adminBarsDataTableViews.renderDeleteModal();
                 adminBarsDataTableControllers.initDeleteModal(barId);
             });
+
+        $('input[name="currentBar"]').change(function() {
+
+            let barId = $(this).closest("tr").attr("id");
+            $.ajax({
+                "url": `/bars/${barId}/update_current_bar`,
+                "type": "PUT",
+                "success": function (data) {
+                }
+            });
+
+        });
 
 
     },
