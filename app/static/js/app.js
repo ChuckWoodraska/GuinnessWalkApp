@@ -24,6 +24,7 @@ function initMap() {
         zoom: 18,
         center: {lat: 32.816, lng: -80.036}
     });
+    $("#map").css("position","fixed !important");
     let infowindow = new google.maps.InfoWindow({});
     let geocoder = new google.maps.Geocoder();
     $.get("/map_data", (data) => {
@@ -62,7 +63,9 @@ function initMap() {
 
 
         });
+        $("#map").css("position","fixed !important");
     });
+    $("#map").css("position","fixed !important");
 }
 
 let mapPageControllers = {
@@ -70,10 +73,15 @@ let mapPageControllers = {
 
     },
     initMap: () => {
-        let map = new google.maps.Map(document.getElementById('map'), {
-            zoom: 18,
-            center: {lat: 32.816, lng: -80.036}
-        });
+        let element = document.getElementById('map');
+
+        // let map = new google.maps.Map(document.getElementById('map'), {
+        //     zoom: 18,
+        //     center: {lat: 32.816, lng: -80.036}
+        // });
+        console.log(map);
+        element.style.position = null;
+        console.log(element.style);
     }
 };
 
