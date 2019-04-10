@@ -24,7 +24,6 @@ function initMap() {
         zoom: 18,
         center: {lat: 32.816, lng: -80.036}
     });
-    $("#map").css("position","fixed !important");
     let infowindow = new google.maps.InfoWindow({});
     let geocoder = new google.maps.Geocoder();
     $.get("/map_data", (data) => {
@@ -63,27 +62,8 @@ function initMap() {
 
 
         });
-        $("#map").css("position","fixed !important");
     });
-    $("#map").css("position","fixed !important");
 }
-
-let mapPageControllers = {
-    initMapPage: () => {
-
-    },
-    initMap: () => {
-        let element = document.getElementById('map');
-
-        // let map = new google.maps.Map(document.getElementById('map'), {
-        //     zoom: 18,
-        //     center: {lat: 32.816, lng: -80.036}
-        // });
-        console.log(map);
-        element.style.position = null;
-        console.log(element.style);
-    }
-};
 
 let adminBarsDataTableModels = {
     tableObj: null
@@ -307,6 +287,7 @@ let barsDataTableControllers = {
             order: [[0, "asc"]]
         });
         initDataTable(barsDataTableModels.tableObj, barsDataTable);
+        $('div.rateit, span.rateit').rateit();
         barsDataTable.find("tbody")
             .on("click", "button.editBar", function (e) {
                 e.preventDefault();
@@ -315,9 +296,8 @@ let barsDataTableControllers = {
                 let tableObj = barsDataTableModels.tableObj;
                 //noinspection JSUnresolvedFunction
                 let barRow = tableObj.row(`#${barId}`);
-                console.log(barRow);
                 //noinspection JSUnresolvedFunction
-                let barRating = tableObj.cell(barRow, tableObj.column("Rating:name")).data();
+                let barRating = tableObj.cell(barRow, tableObj.column("Rating:name")).nodes().to$().find('.rateit').data("rateit-value");
                 //noinspection JSUnresolvedFunction
                 let barComment = tableObj.cell(barRow, tableObj.column("Comments:name")).data();
                 barsDataTableViews.renderEditModal(barRating, barComment);

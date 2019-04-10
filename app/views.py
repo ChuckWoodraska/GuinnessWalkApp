@@ -1,8 +1,9 @@
-from flask import Flask, redirect, url_for, session, request, jsonify, render_template, Blueprint, current_app
+from flask import redirect, url_for, request, jsonify, render_template, Blueprint, current_app
 from app.extensions import login_manager
 from flask_login import logout_user, current_user
 from app.models import Bars, Users, UsersToBars
 from chuck_pyutils import web as web_utils
+from sqlalchemy.sql import func
 
 gw = Blueprint('gw', __name__)
 
@@ -37,8 +38,15 @@ def map_data():
 
 @gw.route('/reviews')
 def reviews():
-    user_bars = UsersToBars.query.filter(UsersToBars.user_id == current_user.id).all()
+    group_ratings = UsersToBars.query.with_entities(UsersToBars.bar_id,
+                                                    func.avg(UsersToBars.rating).label('group_rating')).group_by(
+        UsersToBars.bar_id).subquery()
+
+    user_bars = UsersToBars.query.join(group_ratings, group_ratings.c.bar_id == UsersToBars.bar_id).join(
+        Bars).with_entities(UsersToBars.id, Bars.bar_name, UsersToBars.rating, group_ratings.c.group_rating,
+                            UsersToBars.comments).filter(UsersToBars.user_id == current_user.id).all()
     return render_template('review.html', user_bars=user_bars)
+
 
 @gw.route('/reviews/<int:review_id>', methods=['PUT'])
 def update_review(review_id):
@@ -48,13 +56,18 @@ def update_review(review_id):
         "comments": ""
     }
     data_dict = web_utils.data_formatter(data_dict, request.form)
-    review.rating = data_dict['rating']
-    review.comments = data_dict['commentsl']
+    review.rating = max(min(int(data_dict['rating']), 5), 0)
+    review.comments = data_dict['comments']
     review.update()
-    user_bars = UsersToBars.query.filter(UsersToBars.user_id == current_user.id).all()
+    group_ratings = UsersToBars.query.with_entities(UsersToBars.bar_id,
+                                                    func.avg(UsersToBars.rating).label('group_rating')).group_by(
+        UsersToBars.bar_id).subquery()
+
+    user_bars = UsersToBars.query.join(group_ratings, group_ratings.c.bar_id == UsersToBars.bar_id).join(
+        Bars).with_entities(UsersToBars.id, Bars.bar_name, UsersToBars.rating, group_ratings.c.group_rating,
+                            UsersToBars.comments).filter(UsersToBars.user_id == current_user.id).all()
     template = render_template("reviewTable.html", user_bars=user_bars)
     return jsonify({"message": "Successfully updated review.", "template": template})
-
 
 
 @gw.route('/admin')
@@ -63,17 +76,6 @@ def admin():
     return render_template('admin.html', bar_list=bars)
 
 
-#
-#
-# @gw.route('/settings')
-# def settings():
-#     if 'google_token' in session:
-#         me = google.get('userinfo')
-#         print(me.data)
-#         return render_template('start.html', user=me.data.get('email'))
-#     return render_template('start.html')
-#
-#
 @gw.route('/bars', methods=['GET'])
 def get_bars():
     return jsonify({})
@@ -158,10 +160,10 @@ def delete_bar(bar_id):
     return jsonify({"message": "Successfully deleted bar.", "template": template})
 
 
-
 @gw.route('/reviews', methods=['GET'])
 def get_reviews():
     return jsonify({})
+
 
 #
 # @gw.route('/bars', methods=['POST'])

@@ -1,9 +1,9 @@
 <table class="table table-bordered table-responsive" id="barsDataTable">
     {% for bar in user_bars %}
         <tr id="{{ bar['id'] }}">
-            <td>{{ bar.bars['bar_name'] }}</td>
-            <td>{{ bar.rating }}</td>
-            <td>0</td>
+            <td>{{ bar['bar_name'] }}</td>
+            <td><div class="rateit" data-rateit-value="{{ bar.rating }}" data-rateit-ispreset="true" data-rateit-readonly="true"></div></td>
+            <td><div class="rateit" data-rateit-value="{{ bar.group_rating }}" data-rateit-ispreset="true" data-rateit-readonly="true"></div></td>
             <td>{{ bar.comments }}</td>
             <td>
                 <button class="editBar">Edit</button>
