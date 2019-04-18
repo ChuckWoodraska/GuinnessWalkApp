@@ -79,7 +79,7 @@ def create_app(config_path):
         else:
             # Create a new user
             user = Users(email=google_info['email'])
-            user.display_name = google_info['name']
+            user.display_name = google_info['email']
             user.google_id = google_info['id']
             oauth = OAuth()
             oauth.user = user
