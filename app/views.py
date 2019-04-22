@@ -4,6 +4,7 @@ from flask_login import logout_user, current_user
 from app.models import Bars, Users, UsersToBars
 from chuck_pyutils import web as web_utils
 from sqlalchemy.sql import func
+import googlemaps
 
 gw = Blueprint('gw', __name__)
 
@@ -31,6 +32,8 @@ def map_data():
     for bar in bars:
         bar_dict = {"bar_name": bar.bar_name,
                     "location": bar.location,
+                    "latitude": float(bar.latitude),
+                    "longitude": float(bar.longitude),
                     "current": bar.current}
         bar_list.append(bar_dict)
     return jsonify(bar_list)
@@ -90,10 +93,15 @@ def create_bar():
         "location": ""
     }
     data_dict = web_utils.data_formatter(data_dict, request.form)
+    gmaps = googlemaps.Client(key=current_app.config["GOOGLE_SERVER_KEY"])
+    # Geocoding an address
+    geocode_result = gmaps.geocode(data_dict.get("location"))
     bar = Bars()
     bar.bar_name = data_dict.get("bar_name")
     bar.location = data_dict.get("location")
     bar.position = data_dict.get("position")
+    bar.latitude = float(geocode_result[0]['geometry']['location']['lat'])
+    bar.longitude = float(geocode_result[0]['geometry']['location']['lng'])
     bar_id = Bars.create_commit(bar)
 
     users = Users.query.all()
@@ -117,6 +125,9 @@ def update_bar(bar_id):
         "location": ""
     }
     data_dict = web_utils.data_formatter(data_dict, request.form)
+    gmaps = googlemaps.Client(key=current_app.config["GOOGLE_SERVER_KEY"])
+    # Geocoding an address
+    geocode_result = gmaps.geocode(data_dict.get("location"))
     data_dict["position"] = int(data_dict["position"])
     # Find all bars higher than new position and move them back a position.
     if data_dict.get("position") < bar.position:
@@ -132,6 +143,8 @@ def update_bar(bar_id):
     bar.bar_name = data_dict.get("bar_name")
     bar.location = data_dict.get("location")
     bar.position = data_dict.get("position")
+    bar.latitude = float(geocode_result[0]['geometry']['location']['lat'])
+    bar.longitude = float(geocode_result[0]['geometry']['location']['lng'])
     bar.update()
     template = render_template("adminBarsTable.html", bar_list=Bars.query.all())
     return jsonify({"message": "Successfully updated bar.", "template": template})

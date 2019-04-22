@@ -34,6 +34,7 @@ def create_app(config_path):
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['SQLALCHEMY_DATABASE_URI'] = config['DATABASE']['CONNECTION_STR']
     app.config['GOOGLE'] = config['GOOGLE']['BROWSER_KEY']
+    app.config['GOOGLE_SERVER_KEY'] = config['GOOGLE']['SERVER_KEY']
     app.debug = True
     app.secret_key = 'development'
 

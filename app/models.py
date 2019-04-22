@@ -182,6 +182,8 @@ class Bars(BaseModel):
     bar_name = db.Column("bar_name", db.String(255))
     location = db.Column("location", db.Text)
     position = db.Column("position", db.Integer)
+    latitude = db.Column("latitude", db.DECIMAL)
+    longitude = db.Column("longitude", db.DECIMAL)
     picture_uri = db.Column("picture_uri", db.Text)
     current = db.Column("current", db.Boolean, server_default="0")
 
@@ -215,6 +217,6 @@ class OAuth(OAuthConsumerMixin, db.Model):
         "id", db.Integer, primary_key=True, unique=True, index=True, autoincrement=True
     )
     provider_user_id = db.Column("provider_user_id", db.String(256), unique=True)
-    provider = db.Column("provider", db.String(256), unique=True)
+    provider = db.Column("provider", db.String(256))
     user_id = db.Column("user_id", db.Integer, db.ForeignKey(Users.id))
     user = db.relationship(Users)

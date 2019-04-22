@@ -28,40 +28,36 @@ function initMap() {
     let geocoder = new google.maps.Geocoder();
     $.get("/map_data", (data) => {
         data.forEach(function (item) {
-            geocoder.geocode({'address': item.location}, function (results, status) {
-                if (status === 'OK') {
-                    if (item.current === true) {
-                        let marker = new google.maps.Marker({
-                            position: results[0].geometry.location,
-                            map: map,
-                            title: item.bar_name,
-                            icon: "http://maps.google.com/mapfiles/ms/icons/green-dot.png"
+            // geocoder.geocode({'address': item.location}, function (results, status) {
+            //     if (status === 'OK') {
+            if (item.current === true) {
+                let marker = new google.maps.Marker({
+                    position: {"lat": item.latitude, "lng": item.longitude},
+                    map: map,
+                    title: item.bar_name,
+                    icon: "http://maps.google.com/mapfiles/ms/icons/green-dot.png"
 
-                        });
-                        map.setCenter(results[0].geometry.location);
-                        marker.addListener('click', function () {
-                            infowindow.setContent(marker.title);
-                            infowindow.open(map, marker);
-                        });
-                    } else {
-                        let marker = new google.maps.Marker({
-                            position: results[0].geometry.location,
-                            map: map,
-                            title: item.bar_name,
-                        });
-                        marker.addListener('click', function () {
-                            infowindow.setContent(marker.title);
-                            infowindow.open(map, marker);
-                        });
-                    }
-
-                } else {
-                    alert('Geocode was not successful for the following reason: ' + status);
-                }
-            });
-
+                });
+                map.setCenter({"lat": item.latitude, "lng": item.longitude});
+                marker.addListener('click', function () {
+                    infowindow.setContent(marker.title);
+                    infowindow.open(map, marker);
+                });
+            } else {
+                let marker = new google.maps.Marker({
+                    position: {"lat": item.latitude, "lng": item.longitude},
+                    map: map,
+                    title: item.bar_name,
+                });
+                marker.addListener('click', function () {
+                    infowindow.setContent(marker.title);
+                    infowindow.open(map, marker);
+                });
+            }
 
         });
+
+
     });
 }
 
@@ -87,6 +83,7 @@ let adminBarsDataTableControllers = {
                 {title: "Actions"},
             ],
             order: [[0, "asc"]],
+            // responsive: true,
             buttons: [
                 {
                     className: "btn-color-fix",
@@ -127,7 +124,7 @@ let adminBarsDataTableControllers = {
                 adminBarsDataTableControllers.initDeleteModal(barId);
             });
 
-        $('input[name="currentBar"]').change(function() {
+        $('input[name="currentBar"]').change(function () {
 
             let barId = $(this).closest("tr").attr("id");
             $.ajax({
@@ -284,7 +281,9 @@ let barsDataTableControllers = {
                 {title: "Actions"},
             ],
             dom: "lfip",
-            order: [[0, "asc"]]
+            responsive: true,
+            order: [[0, "asc"]],
+            pageLength: 50
         });
         initDataTable(barsDataTableModels.tableObj, barsDataTable);
         $('div.rateit, span.rateit').rateit();
@@ -292,7 +291,39 @@ let barsDataTableControllers = {
             .on("click", "button.editBar", function (e) {
                 e.preventDefault();
                 e.stopPropagation();
-                let barId = $(this).closest("tr").attr("id");
+                let barId = $(this).parents("tr").attr("id");
+
+                // This work when data table is responsive
+                if (barId == undefined) {
+
+                    let selected_row = $(this).parents('tr');
+                    if (selected_row.hasClass('child')) {
+                        selected_row = selected_row.prev();
+                    }
+                    barId = selected_row.attr("id");
+
+                    let tableObj = barsDataTableModels.tableObj;
+                    //noinspection JSUnresolvedFunction
+                    let barRow = tableObj.row(`#${barId}`);
+                    //noinspection JSUnresolvedFunction
+                    let barRating = tableObj.cell(barRow, tableObj.column("Rating:name")).nodes().to$().find('.rateit').data("rateit-value");
+                    //noinspection JSUnresolvedFunction
+                    let barComment = tableObj.cell(barRow, tableObj.column("Comments:name")).data();
+                    barsDataTableViews.renderEditModal(barRating, barComment);
+                    barsDataTableControllers.initEditModal(barId);
+
+                } else {
+
+                    let tableObj = barsDataTableModels.tableObj;
+                    //noinspection JSUnresolvedFunction
+                    let barRow = tableObj.row(`#${barId}`);
+                    //noinspection JSUnresolvedFunction
+                    let barRating = tableObj.cell(barRow, tableObj.column("Rating:name")).nodes().to$().find('.rateit').data("rateit-value");
+                    //noinspection JSUnresolvedFunction
+                    let barComment = tableObj.cell(barRow, tableObj.column("Comments:name")).data();
+                    barsDataTableViews.renderEditModal(barRating, barComment);
+                    barsDataTableControllers.initEditModal(barId);
+                }
                 let tableObj = barsDataTableModels.tableObj;
                 //noinspection JSUnresolvedFunction
                 let barRow = tableObj.row(`#${barId}`);
@@ -370,16 +401,16 @@ function stopPropagation(event) {
  */
 function initDataTable(table, datatable) {
     // Setup - add a text input to each header cell
-    datatable.find("thead th").each(function (i) {
-        let title = datatable.find("thead th").eq($(this).index()).text();
-        if (title !== "Actions" && title !== "Add" && title !== "Edit" && title !== "Delete" && title !== "Select") {
-            $(this).html(`${title}<br><input type="text" onclick="stopPropagation(event);" data-index="${i}" />`);
-        }
-    });
+    // datatable.find("thead th").each(function (i) {
+    //     let title = datatable.find("thead th").eq($(this).index()).text();
+    //     if (title !== "Actions" && title !== "Add" && title !== "Edit" && title !== "Delete" && title !== "Select") {
+    //         $(this).html(`${title}<br><input type="text" onclick="stopPropagation(event);" data-index="${i}" />`);
+    //     }
+    // });
 
     // Filter event handler
-    $(table.table().container()).on("keyup", "thead input", function () {
-        //noinspection JSUnresolvedFunction
-        table.column($(this).data("index")).search(this.value).draw();
-    });
+    // $(table.table().container()).on("keyup", "thead input", function () {
+    //     //noinspection JSUnresolvedFunction
+    //     table.column($(this).data("index")).search(this.value).draw();
+    // });
 }
