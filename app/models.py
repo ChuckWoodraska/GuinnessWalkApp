@@ -102,17 +102,14 @@ class BaseModel(db.Model):
                 if not x.startswith("__") and x != "_sa_instance_state"
             ]
         )
-        return "{}({})".format(
-            self.__class__.__name__,
-            ", ".join(["{}={}".format(var, getattr(self, var)) for var in obj_vars]),
-        )
+        return f'{self.__class__.__name__}({", ".join([f"{var}={getattr(self, var)}" for var in obj_vars])})'
 
     def serialize(self):
-        fields = {}
-        for key, value in self.__dict__.items():
-            if not key.startswith("_") and key != "metadata":
-                fields[key] = value
-        return fields
+        return {
+            key: value
+            for key, value in self.__dict__.items()
+            if not key.startswith("_") and key != "metadata"
+        }
 
 
 class Users(BaseModel):
